@@ -1,0 +1,1796 @@
+/* Archivo, the motto's serif, and a sans subset to these pages' words. */
+@font-face {
+  font-family: Archivo;
+  src: url('archivo.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: block;
+}
+
+@font-face {
+  font-family: SansSC;
+  src: url('./sans-sc.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: block;
+}
+
+@font-face {
+  font-family: SerifSC;
+  src: url('serif-sc.woff2') format('woff2');
+  font-weight: 700;
+  font-display: block;
+}
+
+/* The opt-in to view transitions between pages is an inline style in each
+   page's head, not here: Chrome decides whether a page takes part when its
+   body begins, often before this file has arrived, and then skips the
+   transition. */
+
+:root {
+  --bg: #0b0c0e;
+  --panel: #141518;
+  --text: #eceef1;
+  --muted: #8d929a;
+  --dim: #4d5158;
+  --line: rgb(255 255 255 / 0.13);
+  --line-soft: rgb(255 255 255 / 0.06);
+  --accent: #3a86ff;
+  --gold: #e2b33c;
+
+  /* No generic family here, so Chinese falls through to --han. */
+  --latin: Archivo, 'Helvetica Neue', Arial;
+  --han: SansSC, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  --han-serif: SerifSC, 'Songti SC', 'Noto Serif CJK SC', serif;
+
+  --bar: 88px;
+  --rail: 176px;
+  --foot: 64px;
+  --edge: clamp(20px, 3.4vw, 48px);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  color-scheme: dark;
+  background: var(--bg);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font: 500 15px/1.6 var(--latin), var(--han);
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The ground: a faint lattice, and a patch of halftone in the lower corner. */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 127px, var(--line-soft) 127px 128px),
+    repeating-linear-gradient(-45deg, transparent 0 127px, var(--line-soft) 127px 128px);
+  opacity: 0.55;
+}
+
+body::after {
+  background: radial-gradient(circle, rgb(255 255 255 / 0.1) 1.1px, transparent 1.6px) 0 0 / 7px 7px;
+  mask-image: radial-gradient(circle at 0% 100%, #000, transparent 42%);
+}
+
+/* Under a mouse the same lattice lights up blue. The lit copy stays still;
+   above it lies a cover of the ground with a soft hole, twice the size of
+   the window so it covers it wherever the hole is, and only the cover moves. */
+.glow {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.glow.on {
+  opacity: 1;
+}
+
+.glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 127px, rgb(58 134 255 / 0.6) 127px 128px),
+    repeating-linear-gradient(-45deg, transparent 0 127px, rgb(58 134 255 / 0.6) 127px 128px);
+}
+
+.glow i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200vw;
+  height: 200vh;
+  background: radial-gradient(circle 300px at 50% 50%, transparent, rgb(11 12 14 / 0.7) 45%, var(--bg));
+  transform: translate(calc(var(--x, 50vw) - 50%), calc(var(--y, 50vh) - 50%));
+  transition: transform 260ms var(--ease);
+  will-change: transform;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ol,
+ul,
+figure {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: var(--edge);
+  top: 12px;
+  z-index: 20;
+  padding: 6px 10px;
+  background: var(--accent);
+  color: #000;
+}
+
+/* Small type used everywhere: labels, indices, data. */
+.label {
+  font-family: var(--latin), var(--han);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The name as its owner writes it, Yan233_, with the lower-case letters as
+   small capitals: capital forms at Archivo's x-height (526 / 686 of the cap
+   height). Archivo has none of its own, so these are its capitals scaled
+   down. Where the name is set large they go one weight heavier, to keep the
+   strokes even, and the A is tucked under the Y's arm by hand, since kerning
+   doesn't reach across the span. */
+.sc {
+  font-size: 0.767em;
+  text-transform: uppercase;
+}
+
+.mark b .sc,
+.index .title h1 .sc,
+.who h2 .sc,
+.ghost .sc {
+  margin-left: -0.08em;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+/* Chrome: bar, rail, foot */
+
+.bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: var(--bar);
+  display: flex;
+  align-items: center;
+  padding-left: var(--edge);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(var(--bg) 60%, rgb(11 12 14 / 0.85));
+  view-transition-name: bar;
+}
+
+.mark {
+  display: grid;
+  line-height: 1;
+}
+
+.mark b {
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.mark small {
+  margin-top: 6px;
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  color: var(--muted);
+}
+
+.nav {
+  display: flex;
+  gap: clamp(20px, 3.6vw, 56px);
+  margin-left: auto;
+  margin-right: clamp(24px, 4vw, 64px);
+}
+
+.nav a {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  padding: 8px 0;
+  line-height: 1;
+  color: var(--text);
+  transition: color 240ms ease;
+}
+
+.nav b {
+  font-stretch: 72%;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.nav small {
+  font-family: var(--han);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 240ms ease;
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 360ms var(--ease);
+}
+
+.nav a:hover::after,
+.nav a[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+.nav a[aria-current='page'],
+.nav a[aria-current='page'] small {
+  color: var(--accent);
+}
+
+.ledger {
+  align-self: stretch;
+  width: var(--rail);
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding-left: 22px;
+  border-left: 1px solid var(--line);
+  line-height: 1;
+}
+
+.ledger output {
+  font-stretch: 100%;
+  font-weight: 300;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail {
+  position: fixed;
+  top: var(--bar);
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  width: var(--rail);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  border-left: 1px solid var(--line);
+  view-transition-name: rail;
+}
+
+.index-no {
+  align-self: center;
+  display: grid;
+  justify-items: end;
+  padding-right: 24px;
+  line-height: 1;
+}
+
+/* The index number, struck through by the rail's own hairline. */
+.index-no .big {
+  position: relative;
+  font-stretch: 100%;
+  font-weight: 900;
+  font-size: 84px;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  margin-bottom: 12px;
+  view-transition-name: index-no;
+}
+
+.index-no .big::after {
+  content: '';
+  position: absolute;
+  left: -40px;
+  right: -24px;
+  top: 52%;
+  height: 1px;
+  background: var(--bg);
+  box-shadow: 0 -1px 0 var(--bg), 0 1px 0 var(--bg);
+}
+
+.index-no .of {
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--text);
+}
+
+.index-no b {
+  margin-top: 8px;
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+
+.next {
+  display: grid;
+  gap: 8px;
+  padding: 22px 22px 26px;
+  border-top: 1px solid var(--line);
+  line-height: 1;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.next small {
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+}
+
+.next b {
+  display: grid;
+  gap: 6px;
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.next b span {
+  font-family: var(--han);
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.next:hover {
+  background: var(--accent);
+  color: #05070a;
+}
+
+.next:hover small {
+  color: #05070a;
+}
+
+.foot {
+  position: fixed;
+  left: 0;
+  right: var(--rail);
+  bottom: 0;
+  z-index: 8;
+  height: var(--foot);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 var(--edge);
+  background: linear-gradient(transparent, var(--bg) 55%);
+  pointer-events: none;
+  view-transition-name: foot;
+}
+
+.foot p {
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.62em;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.foot .copy {
+  margin-left: auto;
+  letter-spacing: 0.2em;
+}
+
+.foot .copy .sc {
+  font-weight: 600;
+}
+
+/* Page body */
+
+main {
+  position: relative;
+  min-height: 100svh;
+  padding: calc(var(--bar) + 44px) calc(var(--rail) + var(--edge)) calc(var(--foot) + 28px) var(--edge);
+  overflow: hidden;
+  /* Nothing of the page reaches under the rail. */
+  clip-path: inset(0 var(--rail) 0 0);
+  view-transition-name: main;
+}
+
+.ghost {
+  position: absolute;
+  left: calc(var(--edge) - 0.06em);
+  bottom: calc(var(--foot) - 0.14em);
+  z-index: -1;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(120px, 19vw, 300px);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  color: rgb(255 255 255 / 0.035);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.head {
+  display: grid;
+  gap: 6px;
+  line-height: 1;
+}
+
+.head h1 {
+  font-family: var(--han);
+  font-weight: 900;
+  font-size: clamp(34px, 3.4vw, 48px);
+  letter-spacing: 0.06em;
+}
+
+/* 00 · Index */
+
+.index .kv {
+  position: absolute;
+  top: var(--bar);
+  right: var(--rail);
+  bottom: 0;
+  width: min(64%, 900px);
+  height: calc(100% - var(--bar));
+  z-index: -1;
+  /* Fades out to the left, and under the name at the foot. */
+  mask-image: linear-gradient(90deg, transparent, #000 30%), linear-gradient(#000 50%, rgb(0 0 0 / 0.3) 88%);
+  mask-composite: intersect;
+}
+
+.index .kv-still {
+  display: none;
+}
+
+html:not(.js) .index .kv {
+  display: none;
+}
+
+html:not(.js) .index .kv-still {
+  display: block;
+  position: absolute;
+  top: calc(var(--bar) + 44px);
+  right: calc(var(--rail) + var(--edge));
+  width: 192px;
+  filter: grayscale(1);
+}
+
+.index .motto {
+  display: grid;
+  gap: 18px;
+  width: max-content;
+}
+
+.index .motto h2 {
+  font-family: var(--han-serif);
+  font-weight: 700;
+  font-size: clamp(36px, 4.4vw, 66px);
+  line-height: 1.24;
+  letter-spacing: 0.04em;
+}
+
+.index .motto h2 span {
+  display: block;
+  white-space: nowrap;
+}
+
+.index .enter {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 28px;
+  margin-top: 40px;
+  padding: 14px 18px 14px 20px;
+  background: var(--accent);
+  color: #05070a;
+  line-height: 1;
+  transition: background-color 300ms ease;
+}
+
+.index .enter b {
+  font-family: var(--han);
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+}
+
+.index .enter small {
+  grid-row: 2;
+  margin-top: 5px;
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+.index .enter i {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  width: 18px;
+  height: 18px;
+  border-top: 2px solid;
+  border-right: 2px solid;
+  transform: rotate(45deg) scale(0.7);
+  transition: transform 300ms var(--ease);
+}
+
+.index .enter:hover {
+  background: var(--text);
+}
+
+.index .enter:hover i {
+  transform: translateX(4px) rotate(45deg) scale(0.7);
+}
+
+.index .title {
+  position: absolute;
+  left: var(--edge);
+  bottom: calc(var(--foot) + 18px);
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(16px, 2.4vw, 36px);
+}
+
+.index .title h1 {
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(54px, 8.4vw, 132px);
+  line-height: 0.78;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.index .title p {
+  display: grid;
+  gap: 7px;
+  padding: 10px 12px 11px;
+  background: rgb(11 12 14 / 0.8);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  line-height: 1;
+}
+
+.index .title p span:last-of-type {
+  color: var(--muted);
+}
+
+.index .title p i {
+  display: block;
+  width: 72px;
+  height: 1px;
+  margin-top: 6px;
+  background: var(--text);
+}
+
+/* 01 · Setting */
+
+.setting {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 32px clamp(32px, 5vw, 80px);
+  align-content: start;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* The cloud is drawn over the whole page, behind the type, so a strong push
+   can carry points well away from their form and back. */
+.setting .field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+html:not(.js) .setting .field {
+  display: none;
+}
+
+.entries {
+  display: grid;
+  gap: 4px;
+  margin-top: 40px;
+  counter-reset: entry;
+}
+
+.entries a {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 12px 0 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--dim);
+  line-height: 1;
+  transition: color 300ms ease, border-color 300ms ease, padding 420ms var(--ease);
+}
+
+.entries a::before {
+  counter-increment: entry;
+  content: counter(entry, decimal-leading-zero);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.entries b {
+  font-family: var(--han);
+  font-weight: 800;
+  font-size: clamp(24px, 2.4vw, 34px);
+  letter-spacing: 0.08em;
+}
+
+.entries small {
+  font-stretch: 110%;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.entries a:hover {
+  color: var(--muted);
+  padding-left: 10px;
+}
+
+.entries a[aria-current='true'] {
+  color: var(--text);
+  border-color: var(--text);
+  padding-left: 0;
+}
+
+.entries a[aria-current='true']::before {
+  color: var(--accent);
+}
+
+/* A form the visitor has spent time with is on file. */
+.entries a.filed:not([aria-current='true']) small::after {
+  content: ' ·';
+  color: var(--accent);
+}
+
+.stage {
+  position: relative;
+  height: clamp(340px, calc(100svh - var(--bar) - var(--foot) - 200px), 640px);
+}
+
+.stage svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.stage svg circle {
+  fill: none;
+  stroke: var(--text);
+}
+
+html:not(.js) .stage {
+  display: none;
+}
+
+/* The hand's reach, following a mouse: a ring as wide as the field it
+   pushes with, which tightens while pressed. */
+.reticle {
+  --r: 240px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: var(--r);
+  height: var(--r);
+  margin: calc(var(--r) / -2) 0 0 calc(var(--r) / -2);
+  border: 1px solid rgb(236 238 241 / 0.28);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease, scale 320ms var(--ease), border-color 320ms ease;
+  will-change: translate;
+}
+
+.reticle.on {
+  opacity: 1;
+}
+
+.reticle.down {
+  scale: 0.82;
+  border-color: rgb(58 134 255 / 0.7);
+}
+
+/* Four ticks on the ring, and a point at its centre. */
+.reticle::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background:
+    linear-gradient(var(--text), var(--text)) 50% 0 / 1px 10px,
+    linear-gradient(var(--text), var(--text)) 50% 100% / 1px 10px,
+    linear-gradient(var(--text), var(--text)) 0 50% / 10px 1px,
+    linear-gradient(var(--text), var(--text)) 100% 50% / 10px 1px;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+
+.reticle i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  background: var(--accent);
+}
+
+.defs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: end;
+  margin-top: -110px;
+  text-align: right;
+}
+
+.js .def:not(.current) {
+  display: none;
+}
+
+html:not(.js) .defs {
+  margin-top: 0;
+}
+
+html:not(.js) .def + .def {
+  margin-top: 28px;
+}
+
+.def header {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  line-height: 1;
+}
+
+.def h2 {
+  font-stretch: 125%;
+  font-weight: 200;
+  font-size: clamp(30px, 4vw, 64px);
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+
+.def header p {
+  font-family: var(--han);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  margin-right: -0.3em;
+}
+
+.defs .pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 16px 0 14px;
+}
+
+.defs .pager i {
+  display: block;
+  width: 26px;
+  height: 3px;
+  background: var(--dim);
+  transition: background-color 300ms ease;
+}
+
+.defs .pager i.on {
+  background: var(--gold);
+}
+
+/* Said only when someone tries to make one of the two win. */
+.def .aside {
+  margin-top: 16px;
+  font-stretch: 100%;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.def .aside q {
+  quotes: none;
+}
+
+.js .def .aside {
+  opacity: 0;
+  clip-path: inset(-30% 0 -30% 100%);
+  transition: opacity 600ms ease, clip-path 1100ms var(--ease);
+}
+
+.js .def .aside.shown {
+  opacity: 1;
+  clip-path: inset(-30% 0 -30% -1px);
+}
+
+/* 02 · Profile */
+
+.profile {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 32px clamp(32px, 5vw, 88px);
+  align-content: start;
+}
+
+.profile .left {
+  display: grid;
+  gap: 30px;
+  align-content: start;
+}
+
+.who h2 {
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(38px, 4.6vw, 68px);
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+.tags {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin-top: 22px;
+}
+
+.tags div {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  background: var(--panel);
+  line-height: 1;
+}
+
+.tags dt,
+.tags dd {
+  padding: 9px 12px;
+  font-family: var(--han);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.tags dt {
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.tags dd {
+  font-weight: 500;
+}
+
+.tags dd[lang='en'] {
+  font-family: var(--latin);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* The signature is the owner's own line, in the motto's serif. */
+.tags .sign {
+  grid-column: 1 / -1;
+}
+
+.tags .sign dd {
+  padding: 8px 12px 7px;
+  font-family: var(--han-serif);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+}
+
+.files h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-family: var(--han);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+}
+
+.file-list {
+  border-top: 1px solid var(--line);
+}
+
+.file-list a {
+  display: grid;
+  grid-template-columns: 30px auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 11px 0 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--dim);
+  line-height: 1;
+  transition: color 300ms ease, border-color 300ms ease, padding 420ms var(--ease);
+}
+
+.file-list b {
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.file-list span {
+  font-family: var(--han);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+}
+
+.file-list small {
+  font-stretch: 110%;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.file-list em {
+  justify-self: end;
+  font-style: normal;
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+
+.file-list a:hover {
+  color: var(--muted);
+  padding-left: 10px;
+}
+
+.file-list a[aria-current='true'] {
+  color: var(--text);
+  border-color: var(--text);
+  padding-left: 0;
+}
+
+.file-list a[aria-current='true'] b {
+  color: var(--accent);
+}
+
+/* Where the visitor's files will go, before there are any. */
+.file-list .none {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 12px 14px 11px;
+  border: 1px dashed var(--dim);
+  color: var(--dim);
+  line-height: 1;
+}
+
+.file-list .none span {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.view {
+  justify-self: end;
+  display: grid;
+  gap: 12px;
+  width: min(100%, calc(100svh - var(--bar) - var(--foot) - 160px));
+  min-width: 0;
+}
+
+.view header,
+.view figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  line-height: 1;
+}
+
+.view .plate {
+  position: relative;
+  aspect-ratio: 1;
+  background: #050608;
+  outline: 1px solid var(--line);
+  outline-offset: 8px;
+}
+
+.view .plate::before,
+.view .plate::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--accent);
+}
+
+.view .plate::before {
+  top: -10px;
+  left: -10px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.view .plate::after {
+  bottom: -10px;
+  right: -10px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.view .plate > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The portrait is 192 pixels square, and is shown as such: each of its
+   pixels two wide, or three on a large mount, on the plate's dark ground. */
+.view .plate {
+  container-type: inline-size;
+}
+
+.view .plate .portrait {
+  inset: 0;
+  width: min(100%, 384px);
+  height: auto;
+  margin: auto;
+  image-rendering: pixelated;
+}
+
+@container (min-width: 700px) {
+  .view .plate .portrait {
+    width: 576px;
+  }
+}
+
+.view .plate [hidden] {
+  display: none;
+}
+
+.js .view .plate > .leaving {
+  animation: plate-out 420ms ease both;
+}
+
+.js .view .plate > .arriving {
+  animation: plate-in 760ms var(--ease) both;
+}
+
+@keyframes plate-out {
+  to { opacity: 0; }
+}
+
+@keyframes plate-in {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* 03 · Elsewhere */
+
+.elsewhere {
+  /* How tall the window is, from 0 at 720px to 1px from 960px up. The doors
+     and the farewell open out with it, smoothly, so the farewell clears the
+     foot at any height in between. */
+  --open: clamp(0px, (100svh - 720px) / 240, 1px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 36px clamp(32px, 5vw, 80px);
+  align-content: start;
+}
+
+/* Numbered from 00, the homepage: 00 is the owner's own throughout, as the
+   cover and the portrait are. */
+.doors {
+  margin-top: calc(18px + 18 * var(--open));
+  border-top: 1px solid var(--line);
+  counter-reset: door -1;
+}
+
+.doors a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: 18px;
+  padding: calc(8px + 7 * var(--open)) 14px calc(7px + 7 * var(--open)) 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1;
+  isolation: isolate;
+  transition: color 300ms ease, padding 400ms var(--ease);
+}
+
+.doors a::before {
+  counter-increment: door;
+  content: counter(door, decimal-leading-zero);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The accent sweeps in from the left. */
+.doors a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 420ms var(--ease);
+}
+
+.doors a:hover {
+  color: #05070a;
+  padding-left: 28px;
+}
+
+.doors a:hover::after {
+  transform: scaleX(1);
+}
+
+.doors a:hover::before,
+.doors a:hover small {
+  color: #05070a;
+}
+
+/* The name opens out as the row is taken. */
+.doors b {
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(22px, min(2.5vw, 24px + 12 * var(--open)), 36px);
+  letter-spacing: 0.01em;
+  transition: letter-spacing 520ms var(--ease);
+}
+
+.doors a:hover b {
+  letter-spacing: 0.07em;
+}
+
+.doors span {
+  display: grid;
+  gap: 5px;
+  justify-items: end;
+  font-family: var(--han);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.doors small {
+  font-family: var(--latin);
+  font-stretch: 85%;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: color 300ms ease;
+}
+
+.doors i {
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid;
+  border-right: 2px solid;
+  justify-self: end;
+  transition: translate 420ms var(--ease);
+}
+
+.doors a[target='_blank'] i {
+  transform: translateY(1px);
+}
+
+.doors a[target='_blank']:hover i {
+  translate: 4px -4px;
+}
+
+/* A receipt printed for the visit. */
+.receipt {
+  align-self: start;
+  justify-self: end;
+  width: min(100%, 340px);
+  margin-top: 8px;
+  padding: 26px 24px 22px;
+  background: #e8e9ea;
+  color: #111317;
+  font-stretch: 85%;
+  font-size: 12px;
+  line-height: 1.4;
+  /* Torn at both ends, like paper off a roll. */
+  mask: radial-gradient(circle at 50% 0, transparent 5px, #000 5.5px) 0 0 / 12px 51% repeat-x,
+    radial-gradient(circle at 50% 100%, transparent 5px, #000 5.5px) 0 100% / 12px 51% repeat-x;
+}
+
+.receipt header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  padding-bottom: 14px;
+  border-bottom: 2px solid;
+  line-height: 1;
+}
+
+.receipt header b {
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+}
+
+.receipt header span {
+  grid-row: 2;
+  margin-top: 6px;
+  font-family: var(--han);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+.receipt header small {
+  grid-row: 1 / 3;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt section {
+  padding: 12px 0;
+  border-bottom: 1px dashed rgb(0 0 0 / 0.4);
+}
+
+.receipt h3 {
+  margin-bottom: 6px;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+}
+
+.receipt h3 span {
+  margin-left: 8px;
+  font-family: var(--han);
+  letter-spacing: 0.2em;
+}
+
+.receipt dl div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* Leader dots between a name and its value. */
+.receipt dl div::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  border-bottom: 1px dotted rgb(0 0 0 / 0.5);
+  transform: translateY(-3px);
+}
+
+.receipt dd {
+  order: 2;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt dt span {
+  margin: 0 6px;
+  font-family: var(--han);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Each file, printed as a thermal printer would: one ink, in dots. */
+.receipt .prints {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.receipt .prints:empty {
+  display: none;
+}
+
+.receipt .prints figure {
+  display: grid;
+  gap: 4px;
+}
+
+.receipt .prints canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+}
+
+.receipt .prints figcaption {
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt .verdict {
+  display: grid;
+  gap: 10px;
+}
+
+.receipt .verdict p {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.receipt .verdict div {
+  display: flex;
+  gap: 8px;
+}
+
+.receipt button {
+  appearance: none;
+  flex: 1;
+  padding: 8px 0 7px;
+  border: 1.5px solid #111317;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.receipt button[aria-pressed='true'] {
+  background: #111317;
+  color: #e8e9ea;
+}
+
+html:not(.js) .receipt .verdict div {
+  display: none;
+}
+
+.receipt svg {
+  display: block;
+  width: 100%;
+  height: 54px;
+  margin-top: 16px;
+}
+
+.receipt svg rect {
+  fill: #111317;
+}
+
+.receipt footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Under the doors, so it stays in view however long the receipt runs. */
+.farewell {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  margin-top: calc(20px + 20 * var(--open));
+}
+
+.farewell h2 {
+  font-family: var(--han-serif);
+  font-weight: 700;
+  font-size: clamp(28px, min(3.2vw, 28px + 18 * var(--open)), 46px);
+  line-height: 1.25;
+  letter-spacing: 0.05em;
+}
+
+.farewell h2 span {
+  display: block;
+}
+
+/* Entrance: blocks are wiped in, in reading order. */
+
+/* Top and bottom are left open, so descenders such as the _ are never cut. */
+.js .in {
+  opacity: 0;
+  clip-path: inset(-40% 100% -40% 0);
+}
+
+.ready .in {
+  opacity: 1;
+  clip-path: inset(-40% -1px -40% 0);
+  transition: opacity 500ms ease calc(var(--d, 0) * 70ms), clip-path 900ms var(--ease) calc(var(--d, 0) * 70ms);
+}
+
+/* Between pages: the chrome stays, the page is replaced from the right. */
+
+::view-transition-old(main) {
+  animation: 260ms ease both leave;
+}
+
+::view-transition-new(main) {
+  animation: 520ms var(--ease) both arrive;
+}
+
+::view-transition-old(index-no) {
+  animation: 240ms ease both leave-up;
+}
+
+::view-transition-new(index-no) {
+  animation: 520ms var(--ease) both arrive-up;
+}
+
+@keyframes leave {
+  to { opacity: 0; transform: translateX(-24px); }
+}
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateX(48px); }
+}
+
+@keyframes leave-up {
+  to { transform: translateY(-40%); opacity: 0; }
+}
+
+@keyframes arrive-up {
+  from { transform: translateY(40%); opacity: 0; }
+}
+
+/* Narrower screens */
+
+@media (max-width: 1100px) {
+  :root {
+    --rail: 132px;
+  }
+
+  .index-no .big {
+    font-size: 76px;
+    margin-bottom: 10px;
+  }
+
+  .nav {
+    gap: 22px;
+  }
+}
+
+@media (max-width: 820px) {
+  :root {
+    --rail: 0px;
+  }
+
+  /* On a phone the page runs in one column: bar, page, next, foot. */
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bar {
+    position: relative;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 0;
+    background: var(--bg);
+  }
+
+  .mark {
+    padding: 14px var(--edge);
+  }
+
+  .ledger {
+    width: auto;
+    margin-left: auto;
+    padding: 0 var(--edge) 0 18px;
+  }
+
+  .ledger output {
+    font-size: 18px;
+  }
+
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0 var(--edge);
+    border-top: 1px solid var(--line);
+  }
+
+  .nav a {
+    padding: 10px 0 12px;
+  }
+
+  .nav b {
+    font-size: 14px;
+  }
+
+  .nav small {
+    font-size: 10px;
+  }
+
+  main {
+    order: 1;
+    min-height: auto;
+    padding: 36px var(--edge) 44px;
+    clip-path: none;
+  }
+
+  .rail {
+    order: 2;
+    position: static;
+    width: auto;
+    display: block;
+    border: 0;
+    view-transition-name: none;
+  }
+
+  .index-no {
+    display: none;
+  }
+
+  .next {
+    margin: 0 var(--edge);
+    border: 1px solid var(--line);
+  }
+
+  .foot {
+    order: 3;
+    position: static;
+    height: auto;
+    padding: 22px var(--edge) 28px;
+    background: none;
+  }
+
+  .foot p:first-child {
+    white-space: normal;
+    letter-spacing: 0.4em;
+    line-height: 2;
+  }
+
+  .foot .copy {
+    display: none;
+  }
+
+  .ghost {
+    bottom: 0;
+    font-size: 30vw;
+  }
+
+  .profile,
+  .setting,
+  .elsewhere {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* A phone scrolls, so the doors and the farewell keep their full size. */
+  .elsewhere {
+    --open: 1px;
+  }
+
+  /* The portrait becomes a square plate, with the name cut across its foot. */
+  .index {
+    display: flex;
+    flex-direction: column;
+    padding-top: 0;
+  }
+
+  .index .kv {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    width: calc(100% + 2 * var(--edge));
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 calc(-1 * var(--edge));
+    mask-image: linear-gradient(#000 62%, transparent);
+  }
+
+  .index .title {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: -30px;
+  }
+
+  .index .motto {
+    margin-top: 44px;
+  }
+
+  .index .enter {
+    align-self: flex-start;
+    margin-top: 30px;
+  }
+
+  .view {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  .stage {
+    height: 86vw;
+  }
+
+  .defs {
+    justify-items: start;
+    margin-top: -40px;
+    text-align: left;
+  }
+
+  .defs .pager {
+    justify-content: flex-start;
+  }
+
+  .def header {
+    justify-items: start;
+  }
+
+  .js .def .aside {
+    clip-path: inset(-30% 100% -30% 0);
+  }
+
+  .js .def .aside.shown {
+    clip-path: inset(-30% -1px -30% 0);
+  }
+
+  /* Each door on two lines: the name, then what it holds. */
+  .doors a {
+    grid-template-columns: 28px minmax(0, 1fr) 14px;
+    row-gap: 8px;
+  }
+
+  .doors a::before {
+    grid-row: 1 / 3;
+  }
+
+  .doors b {
+    grid-column: 2;
+  }
+
+  .doors span {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .doors i {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+
+  .receipt {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  .farewell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ready .in,
+  .nav a::after,
+  .entries a,
+  .file-list a,
+  .doors a,
+  .doors a::after,
+  .doors b,
+  .doors i,
+  .js .def .aside {
+    transition: none;
+  }
+
+  .glow,
+  .reticle {
+    display: none;
+  }
+
+  .js .view .plate > * {
+    animation: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
