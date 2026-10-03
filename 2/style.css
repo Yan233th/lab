@@ -1,0 +1,764 @@
+@font-face {
+  font-family: Archivo;
+  src: url('archivo.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Serif SC';
+  src: url('./serif-sc.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* The lights. They change by a front that runs down the room (.flood), and
+   the type turns as the front passes it (app.js), so it is never grey on
+   grey and never fades out. Secondary type is the ink at half strength
+   rather than a grey of its own, so it turns with the ink and keeps part of
+   its contrast over any ground, the passing band included. */
+:root, [data-lights='off'] {
+  --ink: #e9e6de;
+  --dim: color-mix(in srgb, var(--ink) 52%, transparent);
+  --ground: #101113;
+  --mark: #8b6cff;
+}
+[data-lights='on'] {
+  --ink: #16181c;
+  --dim: color-mix(in srgb, var(--ink) 55%, transparent);
+  --ground: #ebe9e3;
+  --mark: var(--blue);
+}
+
+:root {
+  --uv: #8b6cff;
+  --rule: #7d8085;
+  --blue: #1b4590;
+  --sans: Archivo, 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'Serif SC', 'Songti SC', serif;
+  --pad: clamp(28px, 4vw, 64px);
+  --name: clamp(64px, min(10.5vw, 17vh), 200px);
+  /* Whatever height is left under the name, top and bottom margins. */
+  --paper-h: min(calc(100dvh - 116px - var(--name) * 0.84), 900px);
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--ground); }
+
+body {
+  position: relative;
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 13px/1.5 var(--sans);
+  font-synthesis: none;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+.skip, .sr-only {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip:focus {
+  width: auto;
+  height: auto;
+  clip-path: none;
+  z-index: 10;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+:focus-visible { outline: 1px dashed var(--uv); outline-offset: 6px; }
+
+/* The room: the name across the top; below it the sheet and the wall, all on
+   a cutting mat that the lamp lights up as it passes. */
+
+.room {
+  position: relative;
+  isolation: isolate;
+  /* The lamp's glow may reach past the room's edges; it is cut off there
+     rather than making the page scroll. */
+  overflow: clip;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(130px, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 28px clamp(36px, 4.5vw, 80px);
+  padding: 40px var(--pad) 48px;
+}
+
+/* The mat: a 24 px grid with heavier lines every 120 px, then grain and a
+   falloff towards the edges over it. The lines are a grey that reads the
+   same on either ground, so they need not change with the lights. */
+.room::before, .room::after, .reveal {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.room::before {
+  --minor: rgb(126 126 126 / 0.07);
+  --major: rgb(126 126 126 / 0.14);
+  background:
+    linear-gradient(var(--major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(var(--minor) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--minor) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+.room::after {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px,
+    radial-gradient(ellipse 115% 95% at 50% 52%, transparent 50%, rgb(0 0 0 / 0.55));
+  opacity: 0.8;
+  transition: opacity 1.4s;
+}
+body[data-state='lit'] .room::after { opacity: 0.2; }
+
+/* Where the lamp is, the mat around the sheet picks up its violet. The violet
+   grid stays put under a ground-coloured cover with a soft hole in it; only
+   the cover moves, so following the light costs no repaint. The plain grid
+   above both shows everywhere. */
+.reveal {
+  z-index: -2;
+  overflow: hidden;
+  background:
+    linear-gradient(rgb(139 108 255 / 0.55) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, rgb(139 108 255 / 0.55) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(rgb(139 108 255 / 0.3) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgb(139 108 255 / 0.3) 1px, transparent 1px) 0 0 / 24px 24px;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.reveal i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle var(--reach, 360px) at 50% 50%, transparent 30%, var(--ground));
+  transform: translate(calc(var(--lx, -9999px) - 50%), calc(var(--ly, -9999px) - 50%));
+  will-change: transform;
+}
+.room.lamp-on .reveal { opacity: 1; }
+
+/* When the lights change, the next room's ground comes down from the top as
+   a soft-edged band, under the mat's lines. Only the band moves. */
+.flood {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.flood:not([data-lights]) { display: none; }
+.flood i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(100% + 36vh);
+  background: linear-gradient(var(--ground) calc(100% - 36vh),
+    color-mix(in srgb, var(--ground) 82%, transparent) calc(100% - 27vh),
+    color-mix(in srgb, var(--ground) 45%, transparent) calc(100% - 17vh),
+    color-mix(in srgb, var(--ground) 12%, transparent) calc(100% - 8vh),
+    transparent);
+  transform: translateY(-100%);
+  will-change: transform;
+}
+
+/* The mat's edge rulers. They and the crop marks are one grey that reads
+   on either ground, like the mat's lines. */
+.ruler {
+  position: absolute;
+  z-index: 1;
+  color: var(--rule);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.ruler.top {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 10px;
+  background:
+    linear-gradient(90deg, currentColor 1px, transparent 1px) 0 0 / 120px 10px repeat-x,
+    linear-gradient(90deg, currentColor 1px, transparent 1px) 0 0 / 24px 5px repeat-x;
+}
+.ruler.side {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  background:
+    linear-gradient(currentColor 1px, transparent 1px) 0 0 / 10px 120px repeat-y,
+    linear-gradient(currentColor 1px, transparent 1px) 0 0 / 5px 24px repeat-y;
+}
+
+/* Crop marks at the sheet's corners, registration targets on three sides. */
+.marks {
+  position: absolute;
+  inset: -22px;
+  color: var(--rule);
+  opacity: 0.8;
+  pointer-events: none;
+  --target: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238a8c90' stroke-width='1'%3E%3Ccircle cx='8' cy='8' r='4.5'/%3E%3Cpath d='M8 0v16M0 8h16'/%3E%3C/svg%3E");
+  background:
+    linear-gradient(currentColor, currentColor) left 0 top 22px / 14px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) left 22px top 0 / 1px 14px no-repeat,
+    linear-gradient(currentColor, currentColor) right 0 top 22px / 14px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) right 22px top 0 / 1px 14px no-repeat,
+    linear-gradient(currentColor, currentColor) left 0 bottom 22px / 14px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) left 22px bottom 0 / 1px 14px no-repeat,
+    linear-gradient(currentColor, currentColor) right 0 bottom 22px / 14px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) right 22px bottom 0 / 1px 14px no-repeat,
+    var(--target) left 3px center / 16px 16px no-repeat,
+    var(--target) right 3px center / 16px 16px no-repeat,
+    var(--target) center bottom 3px / 16px 16px no-repeat;
+}
+
+.masthead {
+  grid-area: 1 / 1 / 2 / -1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.name {
+  margin: 0;
+  color: var(--ink);
+  font: 800 var(--name)/0.84 var(--sans);
+  font-stretch: 125%;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+/* The lower-case letters as small capitals: capital forms at the height of
+   Archivo's x-height (526 / 686 of the cap height). Archivo has no small
+   capitals of its own, so the weight goes up to keep the strokes as heavy
+   as the full capitals around them, and the A tucks under the Y's arm the
+   way the font's own kerning would (it doesn't reach across the span). */
+.name .sc {
+  margin-left: -0.08em;
+  font-size: 0.767em;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* The underscore reads the paper under the light: it takes the blue that
+   spot will wash to, and turns bronze when it has had too much. */
+.name .tail {
+  display: inline-block;
+  width: 0.62em;
+  height: 0.1em;
+  margin-left: 0.04em;
+  background: var(--mark);
+  transition: background-color 0.8s;
+}
+.name .tail.toned { background: var(--tone, var(--mark)); transition: none; }
+
+.title {
+  display: grid;
+  color: var(--ink);
+  justify-items: end;
+  gap: 6px;
+  margin: 0 0 0.3em;
+}
+.title b { font: 400 22px/1 var(--serif); letter-spacing: 0.32em; margin-right: -0.32em; }
+.title span, .credit {
+  font: 600 10px/1 var(--sans);
+  font-stretch: 75%;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.caption {
+  grid-area: 2 / 1;
+  align-self: end;
+  display: grid;
+  gap: 5px;
+  max-width: 36ch;
+  margin: 0;
+  color: var(--ink);
+}
+.caption .medium { font: 400 13px/1.6 var(--serif); letter-spacing: 0.06em; }
+.caption [lang='en'] { font: 400 11px/1.4 var(--sans); letter-spacing: 0.02em; color: var(--dim); }
+
+.credit {
+  position: absolute;
+  right: var(--pad);
+  bottom: 20px;
+  margin: 0;
+}
+
+/* The darkroom timer, with no figures: a turn of the long hand is a minute
+   of light on the coating, and the short hand counts the minutes. It runs
+   only while the light is on the coating, and reads whichever print lies on
+   the sheet (app.js), so every print keeps its own time. */
+.timer {
+  grid-area: 2 / 1;
+  align-self: start;
+  justify-self: end;
+  position: relative;
+  width: 84px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rule) 70%, transparent);
+}
+.timer::before, .timer::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+}
+.timer::before {
+  background: repeating-conic-gradient(from -0.6deg, var(--rule) 0 1.2deg, transparent 1.2deg 6deg);
+  mask: radial-gradient(closest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px));
+}
+.timer::after {
+  background: repeating-conic-gradient(from -1deg, var(--ink) 0 2deg, transparent 2deg 30deg);
+  mask: radial-gradient(closest-side, transparent calc(100% - 8px), #000 calc(100% - 7.5px));
+}
+.timer i {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ink);
+  transform-origin: 50% 100%;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.timer i:first-child { width: 3px; height: 24%; margin-left: -1.5px; rotate: var(--m, 0deg); }
+.timer i:last-child { height: 38%; rotate: var(--s, 0deg); }
+.timer i:last-child::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: inherit;
+}
+.timer.running i:last-child { background: var(--uv); box-shadow: 0 0 8px rgb(139 108 255 / 0.8); }
+
+/* The sheet */
+
+.stage {
+  grid-area: 2 / 2;
+  align-self: start;
+  position: relative;
+  margin: 0;
+}
+
+.paper {
+  position: relative;
+  height: var(--paper-h);
+  aspect-ratio: 960 / 1200;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.25), 0 40px 80px -30px rgb(0 0 0 / 0.6);
+  transform-origin: 0 0;
+  touch-action: none;
+  transition: box-shadow 1.4s, translate 0.4s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.paper canvas { display: block; width: 100%; height: 100%; }
+body[data-state='dark'] .paper { cursor: none; }
+body[data-state='lit'] .paper { box-shadow: 0 1px 0 rgb(0 0 0 / 0.08), 0 36px 70px -32px rgb(0 0 0 / 0.38); }
+
+/* The room is dark: the paper is seen by the lamp, whose light also spills
+   onto the room around it. The veil is a cover with a soft hole where the
+   lamp is. It is larger than the sheet by as much as the light may go past
+   the sheet's edges (--spill), so it covers the sheet wherever the light is;
+   only it moves, by transform. With the lamp off, a plug, the hole's exact
+   complement, fills the hole; it fades, so the lamp comes and goes softly. */
+.veil {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 1.4s;
+}
+.veil i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(200% + var(--spill, 0px) * 2);
+  height: calc(200% + var(--spill, 0px) * 2);
+  background: radial-gradient(circle calc(var(--lamp, 300px) * 0.5) at 50% 50%,
+    rgb(12 13 15 / 0) 0%, rgb(12 13 15 / 0.05) 42%, rgb(12 13 15 / 0.46) 100%);
+  transform: translate(calc(var(--x, 0px) - 50%), calc(var(--y, 0px) - 50%));
+  will-change: transform;
+}
+.veil i::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle calc(var(--lamp, 300px) * 0.5) at 50% 50%,
+    rgb(12 13 15 / 0.46) 0%, rgb(12 13 15 / 0.432) 42%, rgb(12 13 15 / 0.365) 56%,
+    rgb(12 13 15 / 0.275) 71%, rgb(12 13 15 / 0.164) 85%, rgb(12 13 15 / 0) 100%);
+  transition: opacity 0.35s;
+  will-change: opacity;
+}
+.paper.lit .veil i::before { opacity: 0; }
+body:not([data-state='dark']) .veil { opacity: 0; }
+/* The light may go a little past the sheet on every side; with a mouse, the
+   sheet answers the pointer that far out. */
+@media (pointer: fine) {
+  body[data-state='dark'] .paper::after {
+    content: '';
+    position: absolute;
+    inset: calc(var(--spill, 0px) * -1);
+  }
+}
+.paper::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: calc(var(--lamp, 300px) * 3.4);
+  height: calc(var(--lamp, 300px) * 3.4);
+  margin: calc(var(--lamp, 300px) * -1.7) 0 0 calc(var(--lamp, 300px) * -1.7);
+  transform: translate(var(--x), var(--y));
+  background: radial-gradient(closest-side, rgb(139 108 255 / 0.17), rgb(139 108 255 / 0.05) 50%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+  will-change: transform;
+}
+.paper.lit::before { opacity: 1; }
+
+.lamp {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: var(--lamp, 300px);
+  height: var(--lamp, 300px);
+  margin: calc(var(--lamp, 300px) / -2) 0 0 calc(var(--lamp, 300px) / -2);
+  transform: translate(var(--x), var(--y));
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(160 132 255 / 0.3), rgb(139 108 255 / 0.1) 56%, transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s;
+  will-change: transform;
+}
+.lamp::before {
+  content: '';
+  position: absolute;
+  inset: 18.75%;
+  border: 1px solid rgb(196 178 255 / 0.45);
+  border-radius: 50%;
+}
+.lamp::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5px 0 0 -5px;
+  background:
+    linear-gradient(rgb(220 208 255 / 0.85), rgb(220 208 255 / 0.85)) center / 1px 100% no-repeat,
+    linear-gradient(rgb(220 208 255 / 0.85), rgb(220 208 255 / 0.85)) center / 100% 1px no-repeat;
+}
+.paper.lit .lamp { opacity: 1; }
+
+/* Before the first touch, the light waits on the paper. */
+.standby {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #b6a2ff;
+  box-shadow: 0 0 0 8px rgb(139 108 255 / 0.16), 0 0 36px 8px rgb(139 108 255 / 0.55);
+  pointer-events: none;
+  animation: breathe 3.2s ease-in-out infinite;
+  transition: opacity 0.5s;
+}
+.touched .standby, body:not([data-state='dark']) .standby { opacity: 0; animation: none; }
+
+@keyframes breathe {
+  50% { transform: scale(0.6); opacity: 0.45; }
+}
+
+/* Water at the top edge once there is something to wash: drag it down. It
+   rises above the sheet with a glow of its own, its line spreads along the
+   edge, and now and then a drop runs down the paper to show the way. */
+.water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -44px;
+  height: calc(44px + 9%);
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: radial-gradient(ellipse 88px 24px at 50% 24px, rgb(150 200 255 / 0.36), rgb(150 200 255 / 0.12) 55%, transparent);
+  cursor: grab;
+  animation: arrive 0.6s ease-out both;
+}
+.water::before {
+  content: '';
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(196 222 255 / 0.9) 20%, #fff 50%, rgb(196 222 255 / 0.9) 80%, transparent);
+  box-shadow: 0 0 16px 2px rgb(170 205 255 / 0.6);
+  animation: spread 1s cubic-bezier(0.2, 0.7, 0.1, 1) both, shimmer 2.8s 1s ease-in-out infinite;
+}
+.water::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 22px);
+  top: 13px;
+  width: 44px;
+  height: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 15' fill='none' stroke='%23d8e9ff' stroke-width='1.35' stroke-linecap='round'%3E%3Cpath d='M1 4.5c3.5-3 7-3 10.5 0s7 3 10.5 0 5.5-2.4 7-1.4'/%3E%3Cpath d='M1 11c3.5-3 7-3 10.5 0s7 3 10.5 0 5.5-2.4 7-1.4'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 5px rgb(160 205 255 / 0.85));
+  animation: surface 1.1s cubic-bezier(0.2, 0.7, 0.1, 1) both, bob 2.8s 1.1s ease-in-out infinite;
+  transition: filter 0.3s;
+}
+.water:hover::after { filter: drop-shadow(0 0 9px rgb(185 220 255)); }
+.water i {
+  position: absolute;
+  left: calc(50% - 1.5px);
+  top: 56px;
+  width: 3px;
+  height: 24px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(rgb(200 226 255 / 0), rgb(232 242 255 / 0.95));
+  opacity: 0;
+  transform-origin: 50% 0;
+  animation: drip 3.6s 1.4s cubic-bezier(0.5, 0, 0.9, 0.55) infinite;
+}
+.water:active { cursor: grabbing; }
+
+@keyframes arrive { from { opacity: 0; } }
+@keyframes surface { from { opacity: 0; transform: translateY(14px); } }
+@keyframes spread { from { opacity: 0; transform: scaleX(0.15); } }
+@keyframes shimmer { 50% { opacity: 0.45; transform: scaleX(0.94); } }
+@keyframes bob { 50% { transform: translateY(4px); } }
+@keyframes drip {
+  0% { opacity: 0; transform: translateY(0) scaleY(0.2); }
+  14% { opacity: 1; transform: translateY(0) scaleY(1); }
+  58% { opacity: 0.9; }
+  72%, 100% { opacity: 0; transform: translateY(96px) scaleY(1); }
+}
+
+/* A print from the wall, laid over the sheet for a look, a little askew so
+   the sheet shows underneath; clicked, it goes back to the wall. The sheet
+   is left as it was. */
+.laid {
+  --rest: translate(2.2%, 1.4%) scale(1) rotate(1.1deg);
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  aspect-ratio: 960 / 1200;
+  padding: 0;
+  border: 0;
+  background: #f3f0e7;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.2), 0 40px 80px -28px rgb(0 0 0 / 0.7);
+  transform: var(--rest);
+  cursor: zoom-out;
+  transition: translate 0.4s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.laid canvas { display: block; width: 100%; height: 100%; }
+.laid[hidden] { display: none; }
+.stage.viewing .water { visibility: hidden; }
+
+/* The print on top can be taken away as a file: an arrow into a tray. On
+   hover the arrow dips in and the print lifts, ready to go. */
+.take {
+  position: absolute;
+  right: -50px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+  border-radius: 3px;
+  color: var(--ink);
+  animation: arrive 0.8s 0.6s ease-out both;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+.take svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.take path:first-child { transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.1, 1); }
+.take:hover { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+.take:hover path:first-child { transform: translateY(1.5px); }
+.take:not([href]) { pointer-events: none; }
+.take[hidden] { display: none; }
+.stage:not(.viewing):has(.take:hover) .paper,
+.stage.viewing:has(.take:hover) .laid { translate: 0 -6px; }
+
+/* The wall: a stack of fresh sheets, and the prints of this visit. */
+
+.wall {
+  grid-area: 2 / 3;
+  align-self: start;
+  justify-self: start;
+  width: clamp(104px, 9vw, 156px);
+  height: var(--paper-h);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+}
+
+.stack {
+  position: relative;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 960 / 1200;
+  margin: 0 10px 10px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: brightness(0.5);
+  transition: filter 1.4s;
+}
+body[data-state='lit'] .stack { filter: none; }
+.stack:disabled { cursor: default; }
+.stack i {
+  position: absolute;
+  inset: 0;
+  background: #f1eee5;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.stack i::before {
+  content: '';
+  position: absolute;
+  inset: 6% 9% 25%;
+  background: #ddd78f;
+}
+.stack i:nth-child(1) { transform: translate(10px, 10px); filter: brightness(0.82); }
+.stack i:nth-child(2) { transform: translate(5px, 5px); filter: brightness(0.91); }
+.stack:not(:disabled):hover i:nth-child(3) { transform: translateY(-6px); }
+body[data-state='lit'] .stack i:nth-child(3) { animation: offer 1.4s 1.6s ease-in-out both; }
+
+@keyframes offer {
+  40% { transform: translateY(-8px); }
+}
+
+.hung {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  margin: 0;
+  padding: 4px 0 0;
+  list-style: none;
+  overflow-y: auto;
+}
+/* A print on the wall comes down onto the sheet when clicked. While it is
+   out, its place on the wall stays empty. */
+.hung button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  transition: translate 0.3s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.hung button:hover { translate: 0 -3px; }
+.hung canvas { display: block; width: 100%; height: auto; box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.5); }
+.hung .out { outline: 1px dashed color-mix(in srgb, var(--dim) 70%, transparent); outline-offset: -1px; }
+.hung .out button { cursor: pointer; translate: none; }
+.hung .out canvas { visibility: hidden; }
+body[data-state='washing'] .hung { pointer-events: none; }
+
+.ghost { pointer-events: none; box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.5); }
+
+/* Entrance, once the type has loaded */
+
+.js :is(.masthead, .caption, .timer, .stage, .wall, .credit) {
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 1s, translate 1.2s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.ready :is(.masthead, .caption, .timer, .stage, .wall, .credit) { opacity: 1; translate: none; }
+.ready :is(.stage, .timer) { transition-delay: 0.12s; }
+.ready .wall { transition-delay: 0.28s; }
+.ready :is(.caption, .credit) { transition-delay: 0.4s; }
+
+html:not(.js) .paper, .failed .paper { display: none; }
+.nojs, .failed .stage::after {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  margin: 0;
+  font: 400 13px/1.8 var(--serif);
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-align: center;
+}
+.nojs span { display: block; font: 400 11px/1.4 var(--sans); }
+.failed .stage::after { content: 'The negative could not be loaded.'; font-family: var(--sans); }
+
+@media (min-width: 961px) and (max-width: 1180px) {
+  .room { grid-template-columns: minmax(150px, 1fr) auto minmax(104px, 1fr); gap: 24px 56px; }
+  .wall { width: 104px; }
+}
+
+/* Narrow screens: one column, the sheet at full width. */
+
+@media (max-width: 960px) {
+  :root { --name: clamp(48px, 13.4vw, 120px); }
+  .room {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 36px;
+    padding: 40px 20px 72px;
+  }
+  .masthead { flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 16px; }
+  .timer { grid-area: 1 / 1; align-self: end; width: 56px; }
+  .title { justify-items: start; margin: 0; }
+  .title b { margin-right: 0; }
+  .caption, .stage, .wall { grid-area: auto; }
+  .wall { width: auto; height: auto; flex-direction: row; align-items: flex-start; }
+  .paper { width: 100%; height: auto; }
+  .stage:has(.take:not([hidden])) { margin-bottom: 16px; }
+  .take { right: 0; bottom: -44px; }
+  .stack { width: 96px; }
+  .hung { grid-auto-flow: column; grid-auto-columns: 96px; overflow-x: auto; overflow-y: visible; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+}

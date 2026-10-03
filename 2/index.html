@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#101113">
+  <title>Yan233_ / 蓝晒</title>
+  <link rel="icon" href="avatar.avif">
+  <link rel="preload" href="archivo.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./serif-sc.woff2" as="font" type="font/woff2" crossorigin>
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body data-state="dark">
+  <a class="skip" href="#sheet">Skip to the paper</a>
+
+  <div class="ruler top" aria-hidden="true"></div>
+  <div class="ruler side" aria-hidden="true"></div>
+
+  <main class="room">
+    <span class="flood" aria-hidden="true"><i></i></span>
+    <span class="reveal" aria-hidden="true"><i></i></span>
+    <header class="masthead">
+      <h1 class="name" aria-label="Yan233_">Y<span class="sc">an</span>233<span class="tail" aria-hidden="true"></span></h1>
+      <p class="title"><b>蓝晒</b><span>Cyanotype · N° 2</span></p>
+    </header>
+
+    <span class="timer" aria-hidden="true"><i></i><i></i></span>
+
+    <figure class="stage">
+      <span class="marks" aria-hidden="true"></span>
+      <div class="paper" id="sheet" tabindex="0" aria-label="一张蓝晒纸。移动指针，或用方向键，让光停在纸上。A sheet of cyanotype paper: hold the light over it with the pointer or the arrow keys.">
+        <canvas width="960" height="1200" aria-hidden="true"></canvas>
+        <span class="veil" aria-hidden="true"><i></i></span>
+        <span class="standby" aria-hidden="true"></span>
+        <span class="lamp" aria-hidden="true"></span>
+        <button class="water" type="button" aria-label="冲洗 · Wash" hidden><i></i></button>
+      </div>
+      <button class="laid" type="button" aria-label="挂回墙上 · Hang it back" hidden><canvas width="960" height="1200"></canvas></button>
+      <a class="take" aria-label="带走这一张 · Take this print" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.75v8.5M4.5 6.75 8 10.25l3.5-3.5"/><path d="M2.25 10.5v3.25h11.5V10.5"/></svg></a>
+    </figure>
+
+    <aside class="wall" aria-label="本次 · This visit">
+      <button class="stack" type="button" aria-label="再晒一张 · Another sheet" disabled><i></i><i></i><i></i></button>
+      <ol class="hung" data-prints></ol>
+    </aside>
+
+    <p class="caption">
+      <span class="medium">棉浆纸，柠檬酸铁铵与铁氰化钾，你的光</span>
+      <span lang="en">Cyanotype on cotton rag, exposed by your light</span>
+      <span lang="en">Yan233th · 2026</span>
+    </p>
+  </main>
+
+  <p class="credit">Claude, for Yan233_</p>
+  <noscript><p class="nojs">这件作品需要 JavaScript 才能曝光。<span lang="en">This piece needs JavaScript to expose.</span></p></noscript>
+  <p class="sr-only" role="status" data-status></p>
+</body>
+</html>
