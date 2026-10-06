@@ -1,0 +1,299 @@
+/* The homepage's ink and paper, swapped at night, and its purple for a link
+   being pointed at. Greys are the ink at partial strength. */
+:root {
+  --ink: 25 33 38;
+  --paper: 250 248 245;
+  --hover: #6d4f74;
+  --hover-line: rgba(109, 79, 116, 0.34);
+  --quiet: rgb(var(--ink) / 0.62);
+  --hair: rgb(var(--ink) / 0.14);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: 250 248 245;
+    --paper: 25 33 38;
+    --hover: #cdb9d1;
+    --hover-line: rgba(205, 185, 209, 0.34);
+  }
+}
+
+/* Set in the system's Helvetica or Arial, as statements are. */
+html {
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One sheet, set from the top margin. */
+body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(28px, 7vw, 72px) clamp(18px, 5vw, 32px);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  /* A hairline under every link, and the homepage's purple line drawn over
+     it while the link is pointed at. */
+  background:
+    linear-gradient(var(--hover-line) 0 0) right bottom / 0 1px no-repeat,
+    linear-gradient(rgb(var(--ink) / 0.3) 0 0) left bottom / 100% 1px no-repeat;
+  transition: color 0.2s ease, background-size 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+a:hover {
+  color: var(--hover);
+  background-position: left bottom;
+  background-size: 100% 1px;
+}
+
+time,
+dd,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Issuer on the left, the document on the right, over a heavy rule. */
+.head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 20px 40px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgb(var(--ink));
+}
+
+.mark {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.issuer p + p {
+  margin-top: 8px;
+  color: var(--quiet);
+  font-size: 12px;
+}
+
+.doc h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.doc dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  gap: 1px 14px;
+  font-size: 12px;
+}
+
+.doc dt,
+.fields dt {
+  color: var(--quiet);
+}
+
+main > * {
+  margin-top: 30px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgb(var(--ink));
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 8.5em 1fr;
+  gap: 2px 16px;
+}
+
+.letter p + p {
+  margin-top: 10px;
+}
+
+/* Figures to the right, a single rule over the total and a double one under it. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 7px 0;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+thead th {
+  padding-top: 0;
+  border-bottom: 1px solid rgb(var(--ink));
+  color: var(--quiet);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+tbody td,
+tbody th {
+  border-bottom: 1px solid var(--hair);
+  font-weight: 400;
+}
+
+.no {
+  width: 3em;
+  padding-right: 1em;
+  text-align: right;
+}
+
+.date {
+  width: 7.5em;
+  text-align: right;
+}
+
+.size {
+  width: 6em;
+  text-align: right;
+}
+
+.none {
+  color: var(--quiet);
+}
+
+tfoot th,
+tfoot td {
+  padding-top: 9px;
+  font-weight: 700;
+}
+
+tfoot td {
+  border-top: 1px solid rgb(var(--ink));
+  border-bottom: 3px double rgb(var(--ink));
+}
+
+/* The asterisks are drawn, and read as nothing. The left padding balances the
+   letter-spacing after the last asterisk. */
+.end {
+  margin-top: 16px;
+  padding-left: 0.18em;
+  color: var(--quiet);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.end::before {
+  content: "*** ";
+  content: "*** " / "";
+}
+
+.end::after {
+  content: " ***";
+  content: " ***" / "";
+}
+
+.terms ol {
+  margin: 8px 0 0;
+  padding-left: 2.2em;
+}
+
+.terms li {
+  margin-top: 3px;
+  padding-left: 0.3em;
+}
+
+.terms li::marker {
+  color: var(--quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Room for a signature that the statement does not need. */
+.sign {
+  margin-top: 26px;
+  font-weight: 700;
+}
+
+.info {
+  color: var(--quiet);
+  font-size: 12px;
+}
+
+.info h2 {
+  color: rgb(var(--ink));
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 24px;
+  margin-top: 36px;
+  padding-top: 8px;
+  border-top: 2px solid rgb(var(--ink));
+  color: var(--quiet);
+  font-size: 11px;
+}
+
+@media (max-width: 560px) {
+  .head {
+    grid-template-columns: 1fr;
+  }
+
+  .doc h1 {
+    text-align: left;
+  }
+
+  .doc dl {
+    justify-content: start;
+  }
+
+  .fields {
+    grid-template-columns: 7.5em 1fr;
+  }
+}
+
+/* On paper: the day's ink whatever the screen, no link lines, and small
+   enough that page 1 of 1 stays true on A4 and on Letter. */
+@page {
+  margin: 14mm;
+}
+
+@media print {
+  :root {
+    --ink: 25 33 38;
+    --paper: 250 248 245;
+  }
+
+  html {
+    zoom: 0.75;
+  }
+
+  body {
+    max-width: none;
+    padding: 0;
+  }
+
+  a {
+    background: none;
+  }
+}
