@@ -1,8 +1,11 @@
-/* The homepage's ink and paper, swapped at night, and its purple for a link
-   being pointed at. Greys are the ink at partial strength. */
+/* The homepage's ink and paper, swapped at night; a sheet a shade lighter
+   than the paper it lies on, white by day; and the homepage's purple for a
+   link being pointed at. Greys are the ink at partial strength. */
 :root {
   --ink: 25 33 38;
   --paper: 250 248 245;
+  --sheet: 255 255 255;
+  --lift: 0 1px 2px rgb(25 33 38 / 0.06), 0 8px 28px rgb(25 33 38 / 0.07);
   --hover: #6d4f74;
   --hover-line: rgba(109, 79, 116, 0.34);
   --quiet: rgb(var(--ink) / 0.62);
@@ -14,12 +17,15 @@
   :root {
     --ink: 250 248 245;
     --paper: 25 33 38;
+    --sheet: 33 42 48;
+    --lift: 0 0 0 1px rgb(250 248 245 / 0.05);
     --hover: #cdb9d1;
     --hover-line: rgba(205, 185, 209, 0.34);
   }
 }
 
-/* Set in the system's Helvetica or Arial, as statements are. */
+/* The page is the desk; the body is one sheet lying on it, set in the
+   system's Helvetica or Arial, as statements are. */
 html {
   background: rgb(var(--paper));
   color: rgb(var(--ink));
@@ -27,11 +33,13 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
-/* One sheet, set from the top margin. */
 body {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: clamp(28px, 7vw, 72px) clamp(18px, 5vw, 32px);
+  box-sizing: border-box;
+  width: min(832px, 100% - 24px);
+  margin: clamp(12px, 2vw, 24px) auto;
+  padding: clamp(18px, 6vw, 56px);
+  background: rgb(var(--sheet));
+  box-shadow: var(--lift);
   font-size: 14px;
   line-height: 1.55;
 }
@@ -288,9 +296,12 @@ tfoot td {
     zoom: 0.75;
   }
 
+  /* The printed page is the sheet. */
   body {
-    max-width: none;
+    width: auto;
+    margin: 0;
     padding: 0;
+    box-shadow: none;
   }
 
   a {

@@ -4,7 +4,7 @@ The index of Yan233_'s lab, served at `lab.yan233.eu.org`. Open `index.html`.
 
 ## The page
 
-A statement of the works held at the Lab, set out the way a bank or a broker sets out a statement: the issuer and the document at the head, the holder's information, a short letter, the works with their total, the Lab's terms, the signature, the important information and the foot. It is in the homepage's ink and paper, which swap at night. The only colour is the homepage's purple, on a link being pointed at. The page uses no script, and prints in the day's ink.
+A statement of the works held at the Lab, set out the way a bank or a broker sets out a statement: the issuer and the document at the head, the holder's information, a short letter, the works with their total, the Lab's terms, the signature, the important information and the foot. It is a white sheet lying on the homepage's paper. At night ink and paper swap, as on the homepage, and the sheet is a shade lighter than the paper it lies on. The only colour is the homepage's purple, on a link being pointed at. The page uses no script, and prints in the day's ink.
 
 ## Works
 
